@@ -29,11 +29,12 @@ def getLoader(datasetName, dataroot, originalSize, imageSize, batchSize=64, work
     from datasets.pix2pix import pix2pix as commonDataset
     import transforms.pix2pix as transforms
   elif datasetName == 'pix2pix_val':
-    from datasets.pix2pix_val import pix2pix_val as commonDataset
+    from datasets.pix2pix_val_zx import pix2pix_val as commonDataset
     import transforms.pix2pix as transforms
   if datasetName == 'pix2pix_class':
     # from datasets.pix2pix import pix2pix as commonDataset
-    from datasets.pix2pix_class import pix2pix as commonDataset
+    # from datasets.pix2pix_class import pix2pix as commonDataset
+    from datasets.pix2pix_class_zx import pix2pix as commonDataset
     import transforms.pix2pix as transforms
   if split == 'train':
     dataset = commonDataset(root=dataroot,

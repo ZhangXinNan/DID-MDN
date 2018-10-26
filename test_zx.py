@@ -21,44 +21,49 @@ from myutils.vgg16 import Vgg16
 from myutils import utils
 import pdb
 
-# Pre-defined Parameters
-parser = argparse.ArgumentParser()
-parser.add_argument('--dataset', required=False,
-  default='pix2pix',  help='')
-parser.add_argument('--dataroot', required=False,
-  default='', help='path to trn dataset')
-parser.add_argument('--valDataroot', required=False,
-  default='', help='path to val dataset')
-parser.add_argument('--mode', type=str, default='B2A', help='B2A: facade, A2B: edges2shoes')
-parser.add_argument('--batchSize', type=int, default=1, help='input batch size')
-parser.add_argument('--valBatchSize', type=int, default=1, help='input batch size')
-parser.add_argument('--originalSize', type=int,
-  default=512, help='the height / width of the original input image')
-parser.add_argument('--imageSize', type=int,
-  default=512, help='the height / width of the cropped input image to network')
-parser.add_argument('--inputChannelSize', type=int,
-  default=3, help='size of the input channels')
-parser.add_argument('--outputChannelSize', type=int,
-  default=3, help='size of the output channels')
-parser.add_argument('--ngf', type=int, default=64)
-parser.add_argument('--ndf', type=int, default=64)
-parser.add_argument('--niter', type=int, default=400, help='number of epochs to train for')
-parser.add_argument('--lrD', type=float, default=0.0002, help='learning rate, default=0.0002')
-parser.add_argument('--lrG', type=float, default=0.0002, help='learning rate, default=0.0002')
-parser.add_argument('--annealStart', type=int, default=0, help='annealing learning rate start to')
-parser.add_argument('--annealEvery', type=int, default=400, help='epoch to reaching at learning rate of 0')
-parser.add_argument('--lambdaGAN', type=float, default=0.01, help='lambdaGAN')
-parser.add_argument('--lambdaIMG', type=float, default=1, help='lambdaIMG')
-parser.add_argument('--poolSize', type=int, default=50, help='Buffer size for storing previously generated samples from G')
-parser.add_argument('--wd', type=float, default=0.0000, help='weight decay in D')
-parser.add_argument('--beta1', type=float, default=0.5, help='beta1 for adam')
-parser.add_argument('--netG', default='', help="path to netG (to continue training)")
-parser.add_argument('--netD', default='', help="path to netD (to continue training)")
-parser.add_argument('--workers', type=int, help='number of data loading workers', default=1)
-parser.add_argument('--exp', default='sample', help='folder to output images and model checkpoints')
-parser.add_argument('--display', type=int, default=5, help='interval for displaying train-logs')
-parser.add_argument('--evalIter', type=int, default=500, help='interval for evauating(generating) images from valDataroot')
-opt = parser.parse_args()
+
+def get_opt():
+  # Pre-defined Parameters
+  parser = argparse.ArgumentParser()
+  parser.add_argument('--dataset', required=False,
+    default='pix2pix',  help='')
+  parser.add_argument('--dataroot', required=False,
+    default='', help='path to trn dataset')
+  parser.add_argument('--valDataroot', required=False,
+    default='', help='path to val dataset')
+  parser.add_argument('--mode', type=str, default='B2A', help='B2A: facade, A2B: edges2shoes')
+  parser.add_argument('--batchSize', type=int, default=1, help='input batch size')
+  parser.add_argument('--valBatchSize', type=int, default=1, help='input batch size')
+  parser.add_argument('--originalSize', type=int,
+    default=512, help='the height / width of the original input image')
+  parser.add_argument('--imageSize', type=int,
+    default=512, help='the height / width of the cropped input image to network')
+  parser.add_argument('--inputChannelSize', type=int,
+    default=3, help='size of the input channels')
+  parser.add_argument('--outputChannelSize', type=int,
+    default=3, help='size of the output channels')
+  parser.add_argument('--ngf', type=int, default=64)
+  parser.add_argument('--ndf', type=int, default=64)
+  parser.add_argument('--niter', type=int, default=400, help='number of epochs to train for')
+  parser.add_argument('--lrD', type=float, default=0.0002, help='learning rate, default=0.0002')
+  parser.add_argument('--lrG', type=float, default=0.0002, help='learning rate, default=0.0002')
+  parser.add_argument('--annealStart', type=int, default=0, help='annealing learning rate start to')
+  parser.add_argument('--annealEvery', type=int, default=400, help='epoch to reaching at learning rate of 0')
+  parser.add_argument('--lambdaGAN', type=float, default=0.01, help='lambdaGAN')
+  parser.add_argument('--lambdaIMG', type=float, default=1, help='lambdaIMG')
+  parser.add_argument('--poolSize', type=int, default=50, help='Buffer size for storing previously generated samples from G')
+  parser.add_argument('--wd', type=float, default=0.0000, help='weight decay in D')
+  parser.add_argument('--beta1', type=float, default=0.5, help='beta1 for adam')
+  parser.add_argument('--netG', default='', help="path to netG (to continue training)")
+  parser.add_argument('--netD', default='', help="path to netD (to continue training)")
+  parser.add_argument('--workers', type=int, help='number of data loading workers', default=1)
+  parser.add_argument('--exp', default='sample', help='folder to output images and model checkpoints')
+  parser.add_argument('--display', type=int, default=5, help='interval for displaying train-logs')
+  parser.add_argument('--evalIter', type=int, default=500, help='interval for evauating(generating) images from valDataroot')
+  opt = parser.parse_args()
+  return opt
+
+opt = get_opt()
 print(opt)
 
 
@@ -225,7 +230,7 @@ for epoch in range(1):
 
         label_final2 = label.max(1)[1]
         label_final=label_final2+1
-
+        print(label, label_final2, label_final)
 
         ## Get de-rained results ##
         x_hat_val = netG(val_inputv, label_final)

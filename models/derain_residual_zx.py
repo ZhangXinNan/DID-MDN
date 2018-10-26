@@ -1,13 +1,6 @@
+#encoding=utf8
 import torch
 import torch.backends.cudnn as cudnn
-import torch.nn as nn
-import torch.nn.functional as F
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.utils.model_zoo as model_zoo
-from collections import OrderedDict
-import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.model_zoo as model_zoo
@@ -32,21 +25,21 @@ def deconv_block(in_dim,out_dim):
                        nn.UpsamplingNearest2d(scale_factor=2))
 
 
-def blockUNet1(in_c, out_c, name, transposed=False, bn=False, relu=True, dropout=False):
-  block = nn.Sequential()
-  if relu:
-    block.add_module('%s.relu' % name, nn.ReLU(inplace=True))
-  else:
-    block.add_module('%s.leakyrelu' % name, nn.LeakyReLU(0.2, inplace=True))
-  if not transposed:
-    block.add_module('%s.conv' % name, nn.Conv2d(in_c, out_c, 3, 1, 1, bias=False))
-  else:
-    block.add_module('%s.tconv' % name, nn.ConvTranspose2d(in_c, out_c, 3, 1, 1, bias=False))
-  if bn:
-    block.add_module('%s.bn' % name, nn.BatchNorm2d(out_c))
-  if dropout:
-    block.add_module('%s.dropout' % name, nn.Dropout2d(0.5, inplace=True))
-  return block
+# def blockUNet1(in_c, out_c, name, transposed=False, bn=False, relu=True, dropout=False):
+#   block = nn.Sequential()
+#   if relu:
+#     block.add_module('%s.relu' % name, nn.ReLU(inplace=True))
+#   else:
+#     block.add_module('%s.leakyrelu' % name, nn.LeakyReLU(0.2, inplace=True))
+#   if not transposed:
+#     block.add_module('%s.conv' % name, nn.Conv2d(in_c, out_c, 3, 1, 1, bias=False))
+#   else:
+#     block.add_module('%s.tconv' % name, nn.ConvTranspose2d(in_c, out_c, 3, 1, 1, bias=False))
+#   if bn:
+#     block.add_module('%s.bn' % name, nn.BatchNorm2d(out_c))
+#   if dropout:
+#     block.add_module('%s.dropout' % name, nn.Dropout2d(0.5, inplace=True))
+#   return block
 
 def blockUNet(in_c, out_c, name, transposed=False, bn=False, relu=True, dropout=False):
   block = nn.Sequential()
@@ -65,95 +58,95 @@ def blockUNet(in_c, out_c, name, transposed=False, bn=False, relu=True, dropout=
   return block
 
 
-class D1(nn.Module):
-  def __init__(self, nc, ndf, hidden_size):
-    super(D1, self).__init__()
+# class D1(nn.Module):
+#   def __init__(self, nc, ndf, hidden_size):
+#     super(D1, self).__init__()
 
-    # 256
-    self.conv1 = nn.Sequential(nn.Conv2d(nc,ndf,kernel_size=3,stride=1,padding=1),
-                               nn.ELU(True))
-    # 256
-    self.conv2 = conv_block(ndf,ndf)
-    # 128
-    self.conv3 = conv_block(ndf, ndf*2)
-    # 64
-    self.conv4 = conv_block(ndf*2, ndf*3)
-    # 32
-    self.encode = nn.Conv2d(ndf*3, hidden_size, kernel_size=1,stride=1,padding=0)
-    self.decode = nn.Conv2d(hidden_size, ndf, kernel_size=1,stride=1,padding=0)
-    # 32
-    self.deconv4 = deconv_block(ndf, ndf)
-    # 64
-    self.deconv3 = deconv_block(ndf, ndf)
-    # 128
-    self.deconv2 = deconv_block(ndf, ndf)
-    # 256
-    self.deconv1 = nn.Sequential(nn.Conv2d(ndf,ndf,kernel_size=3,stride=1,padding=1),
-                                 nn.ELU(True),
-                                 nn.Conv2d(ndf,ndf,kernel_size=3,stride=1,padding=1),
-                                 nn.ELU(True),
-                                 nn.Conv2d(ndf, nc, kernel_size=3, stride=1, padding=1),
-                                 nn.Tanh())
-    """
-    self.deconv1 = nn.Sequential(nn.Conv2d(ndf,nc,kernel_size=3,stride=1,padding=1),
-                                 nn.Tanh())
-    """
-  def forward(self,x):
-    out1 = self.conv1(x)
-    out2 = self.conv2(out1)
-    out3 = self.conv3(out2)
-    out4 = self.conv4(out3)
-    out5 = self.encode(out4)
-    dout5= self.decode(out5)
-    dout4= self.deconv4(dout5)
-    dout3= self.deconv3(dout4)
-    dout2= self.deconv2(dout3)
-    dout1= self.deconv1(dout2)
-    return dout1
+#     # 256
+#     self.conv1 = nn.Sequential(nn.Conv2d(nc,ndf,kernel_size=3,stride=1,padding=1),
+#                                nn.ELU(True))
+#     # 256
+#     self.conv2 = conv_block(ndf,ndf)
+#     # 128
+#     self.conv3 = conv_block(ndf, ndf*2)
+#     # 64
+#     self.conv4 = conv_block(ndf*2, ndf*3)
+#     # 32
+#     self.encode = nn.Conv2d(ndf*3, hidden_size, kernel_size=1,stride=1,padding=0)
+#     self.decode = nn.Conv2d(hidden_size, ndf, kernel_size=1,stride=1,padding=0)
+#     # 32
+#     self.deconv4 = deconv_block(ndf, ndf)
+#     # 64
+#     self.deconv3 = deconv_block(ndf, ndf)
+#     # 128
+#     self.deconv2 = deconv_block(ndf, ndf)
+#     # 256
+#     self.deconv1 = nn.Sequential(nn.Conv2d(ndf,ndf,kernel_size=3,stride=1,padding=1),
+#                                  nn.ELU(True),
+#                                  nn.Conv2d(ndf,ndf,kernel_size=3,stride=1,padding=1),
+#                                  nn.ELU(True),
+#                                  nn.Conv2d(ndf, nc, kernel_size=3, stride=1, padding=1),
+#                                  nn.Tanh())
+#     """
+#     self.deconv1 = nn.Sequential(nn.Conv2d(ndf,nc,kernel_size=3,stride=1,padding=1),
+#                                  nn.Tanh())
+#     """
+#   def forward(self,x):
+#     out1 = self.conv1(x)
+#     out2 = self.conv2(out1)
+#     out3 = self.conv3(out2)
+#     out4 = self.conv4(out3)
+#     out5 = self.encode(out4)
+#     dout5= self.decode(out5)
+#     dout4= self.deconv4(dout5)
+#     dout3= self.deconv3(dout4)
+#     dout2= self.deconv2(dout3)
+#     dout1= self.deconv1(dout2)
+#     return dout1
 
-class D(nn.Module):
-  def __init__(self, nc, nf):
-    super(D, self).__init__()
+# class D(nn.Module):
+#   def __init__(self, nc, nf):
+#     super(D, self).__init__()
 
-    main = nn.Sequential()
-    # 256
-    layer_idx = 1
-    name = 'layer%d' % layer_idx
-    main.add_module('%s.conv' % name, nn.Conv2d(nc, nf, 4, 2, 1, bias=False))
+#     main = nn.Sequential()
+#     # 256
+#     layer_idx = 1
+#     name = 'layer%d' % layer_idx
+#     main.add_module('%s.conv' % name, nn.Conv2d(nc, nf, 4, 2, 1, bias=False))
 
-    # 128
-    layer_idx += 1
-    name = 'layer%d' % layer_idx
-    main.add_module(name, blockUNet(nf, nf*2, name, transposed=False, bn=True, relu=False, dropout=False))
+#     # 128
+#     layer_idx += 1
+#     name = 'layer%d' % layer_idx
+#     main.add_module(name, blockUNet(nf, nf*2, name, transposed=False, bn=True, relu=False, dropout=False))
 
-    # 64
-    layer_idx += 1
-    name = 'layer%d' % layer_idx
-    nf = nf * 2
-    main.add_module(name, blockUNet(nf, nf*2, name, transposed=False, bn=True, relu=False, dropout=False))
+#     # 64
+#     layer_idx += 1
+#     name = 'layer%d' % layer_idx
+#     nf = nf * 2
+#     main.add_module(name, blockUNet(nf, nf*2, name, transposed=False, bn=True, relu=False, dropout=False))
 
-    # 32
-    layer_idx += 1
-    name = 'layer%d' % layer_idx
-    nf = nf * 2
-    main.add_module('%s.leakyrelu' % name, nn.LeakyReLU(0.2, inplace=True))
-    main.add_module('%s.conv' % name, nn.Conv2d(nf, nf*2, 4, 1, 1, bias=False))
-    main.add_module('%s.bn' % name, nn.BatchNorm2d(nf*2))
+#     # 32
+#     layer_idx += 1
+#     name = 'layer%d' % layer_idx
+#     nf = nf * 2
+#     main.add_module('%s.leakyrelu' % name, nn.LeakyReLU(0.2, inplace=True))
+#     main.add_module('%s.conv' % name, nn.Conv2d(nf, nf*2, 4, 1, 1, bias=False))
+#     main.add_module('%s.bn' % name, nn.BatchNorm2d(nf*2))
 
-    # 31
-    layer_idx += 1
-    name = 'layer%d' % layer_idx
-    nf = nf * 2
-    main.add_module('%s.leakyrelu' % name, nn.LeakyReLU(0.2, inplace=True))
-    main.add_module('%s.conv' % name, nn.Conv2d(nf, 1, 4, 1, 1, bias=False))
-    main.add_module('%s.sigmoid' % name , nn.Sigmoid())
-    # 30 (sizePatchGAN=30)
+#     # 31
+#     layer_idx += 1
+#     name = 'layer%d' % layer_idx
+#     nf = nf * 2
+#     main.add_module('%s.leakyrelu' % name, nn.LeakyReLU(0.2, inplace=True))
+#     main.add_module('%s.conv' % name, nn.Conv2d(nf, 1, 4, 1, 1, bias=False))
+#     main.add_module('%s.sigmoid' % name , nn.Sigmoid())
+#     # 30 (sizePatchGAN=30)
 
-    self.main = main
+#     self.main = main
 
-  def forward(self, x):
-    output = self.main(x)
-    return output
+#   def forward(self, x):
+#     output = self.main(x)
+#     return output
 
 
 
@@ -181,49 +174,49 @@ class BottleneckBlock(nn.Module):
 
 
 
-class BottleneckBlock1(nn.Module):
-    def __init__(self, in_planes, out_planes, dropRate=0.0):
-        super(BottleneckBlock1, self).__init__()
-        inter_planes = out_planes * 4
-        self.bn1 = nn.BatchNorm2d(in_planes)
-        self.relu = nn.ReLU(inplace=True)
-        self.conv1 = nn.Conv2d(in_planes, inter_planes, kernel_size=1, stride=1,
-                               padding=0, bias=False)
-        self.bn2 = nn.BatchNorm2d(inter_planes)
-        self.conv2 = nn.Conv2d(inter_planes, out_planes, kernel_size=5, stride=1,
-                               padding=2, bias=False)
-        self.droprate = dropRate
-    def forward(self, x):
-        out = self.conv1(self.relu(self.bn1(x)))
-        if self.droprate > 0:
-            out = F.dropout(out, p=self.droprate, inplace=False, training=self.training)
-        out = self.conv2(self.relu(self.bn2(out)))
-        if self.droprate > 0:
-            out = F.dropout(out, p=self.droprate, inplace=False, training=self.training)
-        return torch.cat([x, out], 1)
+# class BottleneckBlock1(nn.Module):
+#     def __init__(self, in_planes, out_planes, dropRate=0.0):
+#         super(BottleneckBlock1, self).__init__()
+#         inter_planes = out_planes * 4
+#         self.bn1 = nn.BatchNorm2d(in_planes)
+#         self.relu = nn.ReLU(inplace=True)
+#         self.conv1 = nn.Conv2d(in_planes, inter_planes, kernel_size=1, stride=1,
+#                                padding=0, bias=False)
+#         self.bn2 = nn.BatchNorm2d(inter_planes)
+#         self.conv2 = nn.Conv2d(inter_planes, out_planes, kernel_size=5, stride=1,
+#                                padding=2, bias=False)
+#         self.droprate = dropRate
+#     def forward(self, x):
+#         out = self.conv1(self.relu(self.bn1(x)))
+#         if self.droprate > 0:
+#             out = F.dropout(out, p=self.droprate, inplace=False, training=self.training)
+#         out = self.conv2(self.relu(self.bn2(out)))
+#         if self.droprate > 0:
+#             out = F.dropout(out, p=self.droprate, inplace=False, training=self.training)
+#         return torch.cat([x, out], 1)
 
 
 
-class BottleneckBlock2(nn.Module):
-    def __init__(self, in_planes, out_planes, dropRate=0.0):
-        super(BottleneckBlock2, self).__init__()
-        inter_planes = out_planes * 4
-        self.bn1 = nn.BatchNorm2d(in_planes)
-        self.relu = nn.ReLU(inplace=True)
-        self.conv1 = nn.Conv2d(in_planes, inter_planes, kernel_size=1, stride=1,
-                               padding=0, bias=False)
-        self.bn2 = nn.BatchNorm2d(inter_planes)
-        self.conv2 = nn.Conv2d(inter_planes, out_planes, kernel_size=7, stride=1,
-                               padding=3, bias=False)
-        self.droprate = dropRate
-    def forward(self, x):
-        out = self.conv1(self.relu(self.bn1(x)))
-        if self.droprate > 0:
-            out = F.dropout(out, p=self.droprate, inplace=False, training=self.training)
-        out = self.conv2(self.relu(self.bn2(out)))
-        if self.droprate > 0:
-            out = F.dropout(out, p=self.droprate, inplace=False, training=self.training)
-        return torch.cat([x, out], 1)
+# class BottleneckBlock2(nn.Module):
+#     def __init__(self, in_planes, out_planes, dropRate=0.0):
+#         super(BottleneckBlock2, self).__init__()
+#         inter_planes = out_planes * 4
+#         self.bn1 = nn.BatchNorm2d(in_planes)
+#         self.relu = nn.ReLU(inplace=True)
+#         self.conv1 = nn.Conv2d(in_planes, inter_planes, kernel_size=1, stride=1,
+#                                padding=0, bias=False)
+#         self.bn2 = nn.BatchNorm2d(inter_planes)
+#         self.conv2 = nn.Conv2d(inter_planes, out_planes, kernel_size=7, stride=1,
+#                                padding=3, bias=False)
+#         self.droprate = dropRate
+#     def forward(self, x):
+#         out = self.conv1(self.relu(self.bn1(x)))
+#         if self.droprate > 0:
+#             out = F.dropout(out, p=self.droprate, inplace=False, training=self.training)
+#         out = self.conv2(self.relu(self.bn2(out)))
+#         if self.droprate > 0:
+#             out = F.dropout(out, p=self.droprate, inplace=False, training=self.training)
+#         return torch.cat([x, out], 1)
 
 class TransitionBlock(nn.Module):
     def __init__(self, in_planes, out_planes, dropRate=0.0):

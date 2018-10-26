@@ -1,0 +1,15 @@
+__pycache__/
+.idea/
+.vscode/
+*.pth
+*.pyc
+*.zip
+*.log
+facades/DID-MDN-training/
+facades/DID-MDN-training-zx
+facades/testing_fu/
+facades/DID-MDN-test/
+check_class
+
+sample/
+result_all/
